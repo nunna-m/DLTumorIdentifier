@@ -1,1 +1,6 @@
-git+https://github.com/yoshihikoueno/dsargparse.git@master
+matplotlib
+opencv-python
+pyyaml
+ruamel.yaml
+scipy
+scikit-learn
