@@ -4,3 +4,4 @@ pyyaml
 ruamel.yaml
 scipy
 scikit-learn
+docopt
