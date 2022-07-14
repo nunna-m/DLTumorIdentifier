@@ -12,4 +12,5 @@ pyyaml
 ruamel.yaml
 scipy
 scikit-learn
+scikit-image
 xgboost
