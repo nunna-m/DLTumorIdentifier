@@ -1,7 +1,15 @@
+torch
+torchvision
+torchaudio 
+--find-links https://download.pytorch.org/whl/cu113
+numpy
 matplotlib
+regex
+pandas
 opencv-python
+git+https://github.com/yoshihikoueno/dsargparse.git@master
 pyyaml
 ruamel.yaml
 scipy
 scikit-learn
-docopt
+xgboost
