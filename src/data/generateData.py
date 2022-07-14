@@ -44,3 +44,6 @@ def load(traindir,
     generate the base dataset
     '''
     trainSubjectPaths = traindir
+
+def configure_dataset(ds,batch_size=32,buffer_size=1024,repeat=True):
+    pass
