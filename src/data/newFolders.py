@@ -36,6 +36,11 @@ def createNPZFiles(basePath,trainSubjects,testSubjects,foldType, foldNum):
 
 
 def createRawDataFolder(oldPath, newPath):
+    '''copy data as is from kt_trainvaltest into kt_combined
+    Args:
+        oldPath: path of kt_trainvaltest
+        newPath: resultant path to store copied data
+    '''
     trainvaltest = ['train','val','test']
     classes = ['AML','CCRCC']
     for modFolder in os.listdir(oldPath):
