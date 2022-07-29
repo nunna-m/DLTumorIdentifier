@@ -3,8 +3,7 @@ import dsargparse
 
 from . import dataClass
 from . import generateData
-from . import modalityStack
-from . import newCrossVal
+from . import crossValFolds
 from . import visualizeNumpy
 from . import aggregate
 
