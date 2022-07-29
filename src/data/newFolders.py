@@ -61,17 +61,13 @@ def createRawDataFolder(oldPath, newPath):
                 for subjectID in os.listdir(source):
                     shutil.copytree(os.path.join(source,subjectID),os.path.join(dest,subjectID))
 
-    # for modFolder in os.listdir(oldPath):
-    #     for clas in classes:
-    #         currentPath = os.path.join(newPath,modFolder,'rawData',clas)
-    #         for subjectID in os.listdir(currentPath):
-    #             source = os.path.join(currentPath,subjectID)
-    #             for typ in ['fullImage','centerCrop','pixelCrop']:
-    #                 dest = os.path.join(newPath,modFolder,'numpyData',typ)
-    #                 arr = modalityStack.combineData(source,dest,typ)
-    #                 print(f'checking image shape: {arr.shape}')
 
 def createNumpyFiles(oldPath, newPath):
+    '''calling function for createNPZfiles by looping over train and test subjects in respective foldData. Called after creating folds files
+    Args:
+        oldPath: path of kt_trainvaltest
+        newPath: resultant path to store copied data
+    '''
     for modFolder in os.listdir(oldPath):
         print(f"creating numpy files of {modFolder}")
         for folder in ['5CV','10CV']:
