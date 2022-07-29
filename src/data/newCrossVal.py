@@ -6,7 +6,11 @@ from sklearn.model_selection import KFold
 import numpy as np
 
 def createFolds(basePath, kfolds=None):
-    #base path is the path of modality folder + rawData whose children are AML and CCRCC
+    '''using basePath create fold data with subjects and respective classes
+    Args:
+        basePath: path of modality folder + rawData whose children are AML and CCRCC
+        kfolds: if None, create both 5CV and 10CV, however if int like 5 or 8 is passed that CV is created so 8CV
+    '''
     paths = {'AML':list(), 'CCRCC':list()}
     all_classes_path = glob.glob(basePath+'/*/*')
     target_classes = []
@@ -27,7 +31,7 @@ def createFolds(basePath, kfolds=None):
     
     #kfolds CV
     if kfolds is None:
-        #kfolds = [5, 10, len(paths['AML'])]
+        #kfolds = [5, 10, len(paths['AML'])] #use if want LOOCV also
         kfolds = [5, 10]
     else:
         kfolds = [kfolds]
