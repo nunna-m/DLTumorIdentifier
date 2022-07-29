@@ -1,4 +1,4 @@
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 import os
 import numpy as np
 import yaml
@@ -25,5 +25,12 @@ def visualizeSample(sourcePath, destPath):
     #tempPath = '/home/maanvi/Desktop/vis'
     os.makedirs(destPath,exist_ok=True)
 
+    # plt.figure()
+    # for i,mod in enumerate(modalities):
+    #     plt.imshow(image[:,:,i])
+    #     plt.pause(3)
+    # plt.show()
+
     for i,mod in enumerate(modalities):
         cv2.imwrite(os.path.join(destPath,f'{mod}.png'),image[:,:,i])
+        
