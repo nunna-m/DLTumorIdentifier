@@ -5,6 +5,14 @@ from . import modalityStack
 
 
 def createNPZFiles(basePath,trainSubjects,testSubjects,foldType, foldNum):
+    '''create numpy z files from subject data dict returned by modalityStack combine data function
+    Args:
+        basePath: path of modality, child folders would be rawData, numpyData and foldData
+        trainSubjects: 1234_CCRCC is example of subject stored in folds
+        testSubjects: similar to train
+        foldType: 5CV or 10CV
+        foldNum: based on range (0,foldTypeValue (either 5 or 10))
+    '''
     rawDataPath = os.path.join(basePath,'rawData')
     newDataPath = os.path.join(basePath,'numpyData')
 
