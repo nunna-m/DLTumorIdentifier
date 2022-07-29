@@ -1,12 +1,6 @@
 import os
-from . import newCrossVal
-from . import newFolders
-
-datasets_root = '/home/maanvi/LAB/Datasets'
-#datasets_root = '/kw_resources/datasets'
-oldPath = os.path.join(datasets_root,'kt_new_trainvaltest')
-newPath = os.path.join(datasets_root,'kt_combined')
-os.makedirs(newPath, exist_ok=True)
+from . import crossValFolds
+from . import folderUtils
 
 def createRaw(oldPath, newPath):
     '''copy kt_new_trainvaltest to kt_combined. Run only once.
@@ -14,7 +8,8 @@ def createRaw(oldPath, newPath):
         oldPath: path to kt_new_trainvaltest where each data for each modality is there separately
         newPath: creating a copy of old data in new folder kt_combined just in case
     '''
-    newFolders.createRawDataFolder(oldPath=oldPath, newPath=newPath)
+    os.makedirs(newPath, exist_ok=True)
+    folderUtils.createRawDataFolder(oldPath=oldPath, newPath=newPath)
 
 def createNumpy(oldPath, newPath):
     '''create numpy files for every modalitiy, subject, and 5CV and 10CV train and test separately. Lot of repetitive data stored
@@ -24,8 +19,18 @@ def createNumpy(oldPath, newPath):
     '''
     for modFolder in os.listdir(oldPath):
         path = os.path.join(newPath,modFolder,'rawData')
-        newCrossVal.createFolds(basePath=path)
+        crossValFolds.createFolds(basePath=path)
         print(f"done creating {modFolder} modality folds")
-    newFolders.createNumpyFiles(oldPath=oldPath, newPath=newPath)
+    folderUtils.createNumpyFiles(oldPath=oldPath, newPath=newPath)
 
-    
+
+#windows sample command
+# python3 -m src.data createRaw --oldPath "D:\01_Maanvi\LABB\datasets\kt_new_trainvaltest" --newPath "D:\01_Maanvi\LABB\datasets\kt_combined"
+
+#linux sample command
+# python3 -m src.data createRaw --oldPath "/home/maanvi/LAB/Datasets/kt_new_trainvaltest" --newPath "/home/maanvi/LAB/Datasets/kt_combined"
+
+#remote sample command
+# python3 -m src.data createRaw --oldPath "/kw_resources/datasets/kt_new_trainvaltest" --newPath "/kw_resources/datasets/kt_combined"
+
+#similarly for createNumpy
