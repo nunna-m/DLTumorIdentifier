@@ -3,6 +3,35 @@ import yaml
 import shutil
 from . import modalityStack
 
+def createRawDataFolder(oldPath, newPath):
+    '''copy data as is from kt_trainvaltest into kt_combined
+    Args:
+        oldPath: path of kt_trainvaltest
+        newPath: resultant path to store copied data
+    '''
+    trainvaltest = ['train','val','test']
+    classes = ['AML','CCRCC']
+    runningFolders = []
+    for modFolder in os.listdir(oldPath):
+        if not os.path.exists(os.path.join(newPath,modFolder)):
+            runningFolders.append(modFolder)
+            os.makedirs(os.path.join(newPath,modFolder),exist_ok=True)
+            os.makedirs(os.path.join(newPath,modFolder,'rawData'),exist_ok=True)
+            for clas in classes:
+                os.makedirs(os.path.join(newPath,modFolder,'rawData',clas),exist_ok=True)
+                for subfold in ['train','test']:
+                    os.makedirs(os.path.join(newPath,modFolder,'numpyData','fullImage',subfold),exist_ok=True)
+                    os.makedirs(os.path.join(newPath,modFolder,'numpyData','centerCrop',subfold),exist_ok=True)
+                    os.makedirs(os.path.join(newPath,modFolder,'numpyData','pixelCrop',subfold),exist_ok=True)
+
+    for modFolder in runningFolders:
+        for splitType in trainvaltest:
+            for clas in classes:
+                source = os.path.join(oldPath,modFolder,splitType,clas)
+                dest = os.path.join(newPath,modFolder,'rawData',clas)
+                for subjectID in os.listdir(source):
+                    shutil.copytree(os.path.join(source,subjectID),os.path.join(dest,subjectID))
+    
 
 def createNPZFiles(basePath,trainSubjects,testSubjects,foldType, foldNum):
     '''create numpy z files from subject data dict returned by modalityStack combine data function
@@ -33,33 +62,6 @@ def createNPZFiles(basePath,trainSubjects,testSubjects,foldType, foldNum):
             os.makedirs(dest,exist_ok=True)
             arr = modalityStack.combineData(source,dest,typ)
             #print(f'checking image shape: {arr.shape}')
-
-
-def createRawDataFolder(oldPath, newPath):
-    '''copy data as is from kt_trainvaltest into kt_combined
-    Args:
-        oldPath: path of kt_trainvaltest
-        newPath: resultant path to store copied data
-    '''
-    trainvaltest = ['train','val','test']
-    classes = ['AML','CCRCC']
-    for modFolder in os.listdir(oldPath):
-        os.makedirs(os.path.join(newPath,modFolder),exist_ok=True)
-        os.makedirs(os.path.join(newPath,modFolder,'rawData'),exist_ok=True)
-        for clas in classes:
-            os.makedirs(os.path.join(newPath,modFolder,'rawData',clas),exist_ok=True)
-            for subfold in ['train','test']:
-                os.makedirs(os.path.join(newPath,modFolder,'numpyData','fullImage',subfold),exist_ok=True)
-                os.makedirs(os.path.join(newPath,modFolder,'numpyData','centerCrop',subfold),exist_ok=True)
-                os.makedirs(os.path.join(newPath,modFolder,'numpyData','pixelCrop',subfold),exist_ok=True)
-
-    for modFolder in os.listdir(oldPath):
-        for splitType in trainvaltest:
-            for clas in classes:
-                source = os.path.join(oldPath,modFolder,splitType,clas)
-                dest = os.path.join(newPath,modFolder,'rawData',clas)
-                for subjectID in os.listdir(source):
-                    shutil.copytree(os.path.join(source,subjectID),os.path.join(dest,subjectID))
 
 
 def createNumpyFiles(oldPath, newPath):

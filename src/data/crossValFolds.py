@@ -1,3 +1,4 @@
+from operator import mod
 import os
 import random
 import yaml
@@ -60,7 +61,17 @@ def createFolds(basePath, kfolds=None):
                 yaml.dump(store,file)
 
 
-    
+def generateExtra4ModalFolds(path, modalities):
+    '''
+    Outer function to call createFolds on newly created 4 set modalities
+    Sample command to call: python3 -m src.data generateExtra4ModalFolds --ktcombipath "/../path" --modalities am dc ec pc
+    Args:
+        path: kt combi path '/home/maanvi/LAB/datasets/kt_combined'
+        modalities (list[str]): newly added modalities for which fold data must be added
+    '''
+    modalitiesString = '_'.join(modalities)
+    newPath = os.path.join(path, modalitiesString, 'rawData')
+    createFolds(newPath)
 
 # createFolds('/home/maanvi/LAB/Datasets/kt_combined/am_ec_tm/rawData')
 # createFolds('/home/maanvi/LAB/Datasets/kt_combined/ec_tm/rawData')

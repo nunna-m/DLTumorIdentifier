@@ -207,6 +207,47 @@ def combineData(subjectPath, storePath, cropType):
     
     return image
 
+def combineDataNew(subjectPath, cropType):
+    subject_data = getSubjectData(subjectPath, cropType)
+    modalities = subject_data['path'].rsplit(os.path.sep,4)[1]
+    try:
+        if len(modalities) > 2:
+            assert '_' in modalities
+            modalities = modalities.split('_')
+        else:
+            modalities = [f'{modalities}']
+    except AssertionError:
+        print(f"need modailities with _ but got this instead '{modalities}'")
+
+    modalities = sorted(modalities, reverse=False)
+    imageNames = list(subject_data[modalities[0]].keys())
+    data = []
+    for name in imageNames:
+        image = None
+        for modality in modalities:
+            if image is None:
+                image = np.array(subject_data[modality][name])
+            else:
+                image = np.dstack([image, np.array(subject_data[modality][name])])
+        
+        
+        if len(modalities) == 1:
+            #one modality, duplicate thrice
+            image = np.repeat(image[:,:,np.newaxis],3,axis=-1)
+        elif len(modalities) == 2:
+            #two modalities, add 0 array as third dimension
+            zeros = np.zeros((image.shape[0],image.shape[1],1))
+            # print(f'{zeros.shape} zeros shape')
+            # print(f'{image.shape} prev img shape')
+            image = np.dstack((image,zeros))
+        
+        
+        # filename = f"{subject_data['ID']}_{subject_data['clas']}_{name}.npz"
+        labelMapping = {'AML':0,'CCRCC':1}
+        data.append({'image':image,'label':labelMapping[subject_data['clas']]})
+    
+    return data
+
 '''Sample
 subject_data = {
     'subject_path': 'D:\\01_Maanvi\\LABB\\datasets\\kt_new_trainvaltest\\fold1\\am_ec\\train\\AML\\16313384', 'clas': 'AML', \
