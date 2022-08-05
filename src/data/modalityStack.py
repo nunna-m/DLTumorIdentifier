@@ -2,7 +2,7 @@ import numpy as np
 import os
 import cv2
 
-def get_tumor_boundingbox(imgpath, labelpath):
+def get_tumor_boundingbox(imgpath, labelpath, outputsize):
     '''
     get the bounding box coordinates around tumor
     first calculate center of tumor based on segmentation label
@@ -20,27 +20,27 @@ def get_tumor_boundingbox(imgpath, labelpath):
     contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2. CHAIN_APPROX_NONE)
     c = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(c)
-    assert (w,h)<(224,224)
-    assert (x,y)>=(0,0)
+    assert (w,h) < outputsize
+    assert (x,y) >= (0,0)
     const = 0.3
-    diff_x = int(const*w)
-    diff_y = int(const*h)
-    if (x-diff_x)<0:
+    diff_x = int(const * w)
+    diff_y = int(const * h)
+    if (x - diff_x) < 0:
         x1 = 0
     else:
-        x1 = x-diff_x
-    if (y-diff_y)<0:
+        x1 = x - diff_x
+    if (y - diff_y) < 0:
         y1 = 0
     else:
-        y1 = y-diff_y
-    if (x+w+diff_x)>=orig_width:
+        y1 = y - diff_y
+    if (x + w + diff_x) >= orig_width:
         x2 = orig_width
     else:
-        x2 = x+diff_x+w
-    if (y+diff_y+h)>=orig_height:
+        x2 = x + diff_x +w
+    if (y + diff_y + h) >= orig_height:
         y2 = orig_height
     else:
-        y2 = y+diff_y+h
+        y2 = y + diff_y + h
 
 
     #gaussian standardize all modalities
@@ -51,12 +51,13 @@ def get_tumor_boundingbox(imgpath, labelpath):
     orig_image = (orig_image + 1.0) / 2.0
     orig_image *= 255
     backup = orig_image[y1:y2,x1:x2]
-    backup = cv2.resize(backup, (224,224),interpolation = cv2.INTER_CUBIC)
-    mod = imgpath.rsplit(os.path.sep,2)[1]
+    backup = cv2.resize(backup, outputsize)
+    
+    #mod = imgpath.rsplit(os.path.sep,2)[1]
     #cv2.imwrite(f'/home/maanvi/Desktop/boxCrop{mod}.png',backup)
     return backup
 
-def get_exact_tumor(imgpath, labelpath):
+def get_exact_tumor(imgpath, labelpath, outputsize):
     '''
     get the exact segmented tumor region (pixel perfect) based on label already provided
     '''
@@ -85,33 +86,35 @@ def get_exact_tumor(imgpath, labelpath):
     (topy, topx) = (np.min(y), np.min(x))
     (bottomy, bottomx) = (np.max(y), np.max(x))
     out = out[topy:bottomy+1, topx:bottomx+1]
-    out = cv2.resize(out, (224,224), interpolation=cv2.INTER_CUBIC)
-    mod = imgpath.rsplit(os.path.sep,2)[1]
+    out = cv2.resize(out, outputsize, interpolation=cv2.INTER_CUBIC)
+    
+    #mod = imgpath.rsplit(os.path.sep,2)[1]
     #cv2.imwrite(f'/home/maanvi/Desktop/pixelCrop{mod}.png',out)
     return out
 
-def get_orig_image(imgpath, labelpath):
+def get_orig_image(imgpath, outputsize):
     image = cv2.imread(imgpath)[:,:,0]
-    image = cv2.resize(image, (224,224),interpolation = cv2.INTER_CUBIC)
-    mod = imgpath.rsplit(os.path.sep,2)[1]
+    image = cv2.resize(image, outputsize)
+
+    #mod = imgpath.rsplit(os.path.sep,2)[1]
     #cv2.imwrite(f'/home/maanvi/Desktop/actual{mod}.png',image)
     return image
 
-def getImage(imagePath, labelPath, cropType=None):
+def getImage(imagePath, labelPath, cropType=None,outputsize=(224,224)):
     if cropType is None:
         #read image full and pass back
-        return get_orig_image(imagePath,labelPath)
+        return get_orig_image(imagePath,outputsize=outputsize)
     
     if cropType == 'center':
         #center crop and pass back
-        return get_tumor_boundingbox(imagePath, labelPath)
+        return get_tumor_boundingbox(imagePath, labelPath,outputsize=outputsize)
     
     if cropType == 'pixel':
         #crop based on segmentation label and pass back
-        return get_exact_tumor(imagePath, labelPath)
+        return get_exact_tumor(imagePath, labelPath,outputsize=outputsize)
 
 
-def getSubjectData(subject_path, cropType):
+def getSubjectData(subject_path, cropType,outputsize=(224,224)):
     #print(cropType)
     pathParts = subject_path.rsplit(os.path.sep, 4)
     modalities = pathParts[1].split('_')
@@ -148,7 +151,9 @@ def getSubjectData(subject_path, cropType):
                 filter(lambda x: os.path.splitext(x)[0],
                 gathered_modalityPaths[modality])
             )
-    #crop type mapping: {'centerCrop'->'center','pixelCrop'->'pixel',None->'fullImage'}
+    #default
+    if cropType is None:
+        cropType = 'fullImage'
     cropTypeMapping = {
         'centerCrop':'center',
         'pixelCrop':'pixel',
@@ -156,13 +161,14 @@ def getSubjectData(subject_path, cropType):
     }
     for modality,names in gathered_modalityPaths.items():
         subject_data[modality] = {
-            os.path.splitext(name)[0]:getImage(os.path.join(subject_path,modality,name),os.path.join(subject_path,modality+'L',name),cropTypeMapping[cropType]) for name in names
+            os.path.splitext(name)[0]:getImage(os.path.join(subject_path,modality,name),os.path.join(subject_path,modality+'L',name),cropTypeMapping[cropType],outputsize=outputsize) for name in names
         }
 
-    #print(subject_data)
+    #print(subject_data['am']['1'].shape)
     return subject_data
 
 def combineData(subjectPath, storePath, cropType):
+    '''combine data function called to create images intermediately and store them on disk, NOT on the fly'''
     # tempSubjectPath = '/home/maanvi/LAB/Datasets/kt_new_trainvaltest/am_pc_tm/train/CCRCC/17672172'
     subject_data = getSubjectData(subjectPath, cropType)
     #print(subject_data['path'])
@@ -207,8 +213,9 @@ def combineData(subjectPath, storePath, cropType):
     
     return image
 
-def combineDataNew(subjectPath, cropType):
-    subject_data = getSubjectData(subjectPath, cropType)
+def combineDataNew(subjectPath, cropType=None,outputsize=(224,224)):
+    '''combine data on the fly directly called function from pytorch dataLoader'''
+    subject_data = getSubjectData(subjectPath, cropType, outputsize=outputsize)
     modalities = subject_data['path'].rsplit(os.path.sep,4)[1]
     try:
         if len(modalities) > 2:
