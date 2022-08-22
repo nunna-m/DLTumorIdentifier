@@ -11,17 +11,20 @@ def createRaw(oldPath, newPath):
     os.makedirs(newPath, exist_ok=True)
     folderUtils.createRawDataFolder(oldPath=oldPath, newPath=newPath)
 
-def createNumpy(oldPath, newPath):
-    '''create numpy files for every modalitiy, subject, and 5CV and 10CV train and test separately. Lot of repetitive data stored
+def createNumpy(oldPath, newPath, numpyFiles=False):
+    '''create numpy files for every modalitiy, subject, and 5CV and 10CV train and test separately. Lot of repetitive data stored -> Sample command: python -m src.data createNumpy --oldPath "D:\01_Maanvi\LABB\datasets\kt_new_trainvaltest" --newPath "D:\01_Maanvi\LABB\datasets\kt_combined" [--numpyFiles] include last flag if you want numpy files
     Args:
         oldPath: path to kt_new_trainvaltest where each data for each modality is there separately
         newPath: path to kt_combined
+        numpyFiles (bool): if False, just create folds, if true create numpy files also
     '''
     for modFolder in os.listdir(oldPath):
         path = os.path.join(newPath,modFolder,'rawData')
         crossValFolds.createFolds(basePath=path)
         print(f"done creating {modFolder} modality folds")
-    folderUtils.createNumpyFiles(oldPath=oldPath, newPath=newPath)
+    if numpyFiles:
+        print("Create numpy files")
+        folderUtils.createNumpyFiles(oldPath=oldPath, newPath=newPath)
 
 
 #windows sample command
