@@ -1,4 +1,6 @@
 import os
+from tkinter import image_names
+from urllib import robotparser
 import numpy as np
 import torch
 import pandas as pd
@@ -8,6 +10,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 import yaml
+import albumentations as A
 
 #import local libraries
 from . import modalityStack
@@ -74,7 +77,7 @@ class KidneyTumorDataset1(Dataset):
 
 def showImage(image, label):
     '''show Image'''
-    image = image[:,:,0]
+    #image = image[:,:,0]
     plt.imshow(image)
     if label == 0:
         heading = 'AML'
@@ -88,8 +91,9 @@ def callThisWhenNeeded():
     fig = plt.figure()
     cv = 5
     foldNum = 0
-    root = '/home/maanvi/LAB/Datasets/kt_combined'
-    modalities = ["am","dc","ec","pc"]
+    #root = '/home/maanvi/LAB/Datasets/kt_combined'
+    root = r'D:\01_Maanvi\LABB\Datasets/kt_combined'
+    modalities = ["am","dc","ec"]
     train_or_test = 'train'
     #cropTypeMapping = {'centerCrop':'center','pixelCrop':'pixel','fullImage': None}
     cropType = 'fullImage'
@@ -122,16 +126,29 @@ def callThisWhenNeeded():
     #     if i == 3:
     #         plt.show()
     #         break
-
+    alb_transform = A.Compose([
+        A.CLAHE(),
+        A.RandomRotate90(),
+        A.Transpose(),
+        A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.50, rotate_limit=45, p=.75),
+        A.Blur(blur_limit=3),
+        A.OpticalDistortion(),
+        A.GridDistortion(),
+        A.HueSaturationValue(),
+    ])
     #plotting transformed samples
     #use samples instead of kt_dataset because samples is flattened version of kt
     sample = samples[42]
-    for i, tsfrm in enumerate([scale, crop, composed]):
-        transformed_sample = tsfrm(sample)
-        ax = plt.subplot(1, 3, i + 1)
+    print(type(sample))
+   # for i, tsfrm in enumerate([scale, crop, composed]):
+    for i in range(8):
+        #transformed_sample = tsfrm(sample)
+        transformed_sample = alb_transform(image=sample['image'])
+        ax = plt.subplot(1, 8, i + 1)
         plt.tight_layout()
-        ax.set_title(type(tsfrm).__name__)
-        showImage(**transformed_sample)
+        #ax.set_title(type(tsfrm).__name__)
+        #showImage(**transformed_sample)
+        showImage(transformed_sample,sample['label'])
     
     plt.show()
 
