@@ -25,7 +25,7 @@ def createNumpy(oldPath, newPath):
 
 
 #windows sample command
-# python3 -m src.data createRaw --oldPath "D:\01_Maanvi\LABB\datasets\kt_new_trainvaltest" --newPath "D:\01_Maanvi\LABB\datasets\kt_combined"
+# python -m src.data createRaw --oldPath "D:\01_Maanvi\LABB\datasets\kt_new_trainvaltest" --newPath "D:\01_Maanvi\LABB\datasets\kt_combined"
 
 #linux sample command
 # python3 -m src.data createRaw --oldPath "/home/maanvi/LAB/Datasets/kt_new_trainvaltest" --newPath "/home/maanvi/LAB/Datasets/kt_combined"
